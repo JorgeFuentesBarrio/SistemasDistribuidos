@@ -1,0 +1,363 @@
+[
+    {
+        "id": "f1526ff033517b8b",
+        "type": "tab",
+        "label": "PROYECTO",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1b1ba9cb14077501",
+        "type": "mqtt in",
+        "z": "f1526ff033517b8b",
+        "name": "",
+        "topic": "tractor",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "4d6e9f41f53da2bd",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 110,
+        "y": 200,
+        "wires": [
+            [
+                "325c7a4f907cbe61"
+            ]
+        ]
+    },
+    {
+        "id": "325c7a4f907cbe61",
+        "type": "json",
+        "z": "f1526ff033517b8b",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 290,
+        "y": 200,
+        "wires": [
+            [
+                "9301e592ec16c58b"
+            ]
+        ]
+    },
+    {
+        "id": "9301e592ec16c58b",
+        "type": "function",
+        "z": "f1526ff033517b8b",
+        "name": "function 1",
+        "func": "msg.topic=\"Cosechadora \"+ msg.payload.id; \nmsg.payload= msg.payload.carga; \nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 200,
+        "wires": [
+            [
+                "f0e647b05550ada3",
+                "9e1891312fab3361"
+            ]
+        ]
+    },
+    {
+        "id": "f0e647b05550ada3",
+        "type": "ui_gauge",
+        "z": "f1526ff033517b8b",
+        "name": "",
+        "group": "2cd7dd386082a449",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "% tolva",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "60",
+        "seg2": "85",
+        "diff": false,
+        "className": "",
+        "x": 680,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "9e1891312fab3361",
+        "type": "ui_text",
+        "z": "f1526ff033517b8b",
+        "group": "2cd7dd386082a449",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "ID Activo:",
+        "format": "{{msg.topic}} ({{msg.payload}}%)",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 680,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "28af1f7941deb30d",
+        "type": "mqtt in",
+        "z": "f1526ff033517b8b",
+        "name": "",
+        "topic": "camiones",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "4d6e9f41f53da2bd",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 360,
+        "wires": [
+            [
+                "6eeb15b5bb2593e6"
+            ]
+        ]
+    },
+    {
+        "id": "6eeb15b5bb2593e6",
+        "type": "json",
+        "z": "f1526ff033517b8b",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 290,
+        "y": 360,
+        "wires": [
+            [
+                "41fcfeaff5d17f38"
+            ]
+        ]
+    },
+    {
+        "id": "41fcfeaff5d17f38",
+        "type": "function",
+        "z": "f1526ff033517b8b",
+        "name": "function 2",
+        "func": "msg.topic=\"Camion \"+ msg.payload.id; \nmsg.payload= msg.payload.capacidad; \nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 360,
+        "wires": [
+            [
+                "5aace1cfaa28431a",
+                "712b24207ca26e01"
+            ]
+        ]
+    },
+    {
+        "id": "5aace1cfaa28431a",
+        "type": "ui_gauge",
+        "z": "f1526ff033517b8b",
+        "name": "",
+        "group": "c1f6009cebad339d",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "% capacidad",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "60",
+        "seg2": "85",
+        "diff": false,
+        "className": "",
+        "x": 690,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "712b24207ca26e01",
+        "type": "ui_text",
+        "z": "f1526ff033517b8b",
+        "group": "c1f6009cebad339d",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Ultimo camion: ",
+        "format": "{{msg.topic}} ({{msg.payload}}%)",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 700,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "216fa53fab3cf8a4",
+        "type": "mqtt in",
+        "z": "f1526ff033517b8b",
+        "name": "",
+        "topic": "asignaciones",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "4d6e9f41f53da2bd",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 500,
+        "wires": [
+            [
+                "52e1e912c54fee9d"
+            ]
+        ]
+    },
+    {
+        "id": "52e1e912c54fee9d",
+        "type": "json",
+        "z": "f1526ff033517b8b",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 330,
+        "y": 500,
+        "wires": [
+            [
+                "e824e61debb54bda"
+            ]
+        ]
+    },
+    {
+        "id": "e824e61debb54bda",
+        "type": "ui_template",
+        "z": "f1526ff033517b8b",
+        "group": "2e0c648a1844f26a",
+        "name": "",
+        "order": 0,
+        "width": "6",
+        "height": "5",
+        "format": "<div style=\"padding: 15px; font-size: 16px; background: #222; color: #69db7c; border-radius: 6px;\">\n    <strong>Aviso Central:</strong> {{msg.payload.mensaje || msg.payload}}\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 480,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4d6e9f41f53da2bd",
+        "type": "mqtt-broker",
+        "name": "cosecha",
+        "broker": "localhost",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "2cd7dd386082a449",
+        "type": "ui_group",
+        "name": "cosechadoras",
+        "tab": "324617118524b002",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "c1f6009cebad339d",
+        "type": "ui_group",
+        "name": "camiones",
+        "tab": "324617118524b002",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2e0c648a1844f26a",
+        "type": "ui_group",
+        "name": "asignaciones",
+        "tab": "324617118524b002",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "324617118524b002",
+        "type": "ui_tab",
+        "name": "cosecha",
+        "icon": "dashboard",
+        "order": 3,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "897c949d75f74326",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]
