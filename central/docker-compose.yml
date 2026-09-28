@@ -1,0 +1,62 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  mariadb:
+    image: mariadb:10.11
+    container_name: mariadb
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: db
+      MYSQL_USER: db
+      MYSQL_PASSWORD: db
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  nodered:
+    image: nodered/node-red:latest
+    container_name: nodered
+    restart: unless-stopped
+    ports:
+      - "1880:1880"
+    volumes:
+      - nodered_data:/data
+      - ./flows.json:/data/flows.json
+    depends_on:
+      - mosquitto
+      - mariadb
+
+  central:
+    build: .
+    container_name: central
+    restart: unless-stopped
+    depends_on:
+      mosquitto:
+        condition: service_started
+      mariadb:
+        condition: service_healthy
+    environment:
+      BROKER_HOST: mosquitto
+      BROKER_PORT: 1883
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_USER: db
+      DB_PASS: db
+      DB_NAME: db
+      PYTHONUNBUFFERED: 1
+
+volumes:
+  nodered_data:
