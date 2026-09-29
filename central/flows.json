@@ -344,7 +344,7 @@
         "id": "4d6e9f41f53da2bd",
         "type": "mqtt-broker",
         "name": "cosecha",
-        "broker": "localhost",
+        "broker": "mosquitto",
         "port": 1883,
         "clientid": "",
         "autoConnect": true,
