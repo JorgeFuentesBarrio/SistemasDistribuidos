@@ -140,7 +140,7 @@
         "type": "mqtt in",
         "z": "f1526ff033517b8b",
         "name": "",
-        "topic": "tractor",
+        "topic": "cosechadoras",
         "qos": "1",
         "datatype": "auto-detect",
         "broker": "4d6e9f41f53da2bd",
@@ -148,7 +148,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 110,
+        "x": 130,
         "y": 200,
         "wires": [
             [
@@ -162,7 +162,7 @@
         "z": "f1526ff033517b8b",
         "name": "",
         "property": "payload",
-        "action": "",
+        "action": "obj",
         "pretty": false,
         "x": 290,
         "y": 200,
@@ -187,7 +187,9 @@
         "x": 480,
         "y": 200,
         "wires": [
-            []
+            [
+                "f461bf1b42557c79"
+            ]
         ]
     },
     {
@@ -195,7 +197,7 @@
         "type": "mqtt in",
         "z": "f1526ff033517b8b",
         "name": "",
-        "topic": "camiones",
+        "topic": "truck",
         "qos": "1",
         "datatype": "auto-detect",
         "broker": "4d6e9f41f53da2bd",
@@ -203,7 +205,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 120,
+        "x": 110,
         "y": 360,
         "wires": [
             [
@@ -217,7 +219,7 @@
         "z": "f1526ff033517b8b",
         "name": "",
         "property": "payload",
-        "action": "",
+        "action": "obj",
         "pretty": false,
         "x": 290,
         "y": 360,
@@ -242,7 +244,9 @@
         "x": 460,
         "y": 360,
         "wires": [
-            []
+            [
+                "65c7f9d72b5b0a80"
+            ]
         ]
     },
     {
@@ -272,12 +276,14 @@
         "z": "f1526ff033517b8b",
         "name": "",
         "property": "payload",
-        "action": "",
+        "action": "str",
         "pretty": false,
         "x": 330,
         "y": 500,
         "wires": [
-            []
+            [
+                "c1d34e2efa18724f"
+            ]
         ]
     },
     {
@@ -328,8 +334,8 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 670,
-        "y": 180,
+        "x": 1190,
+        "y": 120,
         "wires": [
             []
         ]
@@ -354,8 +360,8 @@
         "className": "",
         "value": "topic",
         "valueType": "msg",
-        "x": 670,
-        "y": 220,
+        "x": 1190,
+        "y": 160,
         "wires": []
     },
     {
@@ -406,8 +412,8 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 650,
-        "y": 360,
+        "x": 1170,
+        "y": 300,
         "wires": [
             []
         ]
@@ -432,8 +438,8 @@
         "className": "",
         "value": "topic",
         "valueType": "msg",
-        "x": 650,
-        "y": 400,
+        "x": 1170,
+        "y": 340,
         "wires": []
     },
     {
@@ -456,7 +462,55 @@
         "className": "",
         "value": "payload",
         "valueType": "msg",
-        "x": 510,
+        "x": 1170,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "f461bf1b42557c79",
+        "type": "debug",
+        "z": "f1526ff033517b8b",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "65c7f9d72b5b0a80",
+        "type": "debug",
+        "z": "f1526ff033517b8b",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "c1d34e2efa18724f",
+        "type": "debug",
+        "z": "f1526ff033517b8b",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
         "y": 500,
         "wires": []
     }

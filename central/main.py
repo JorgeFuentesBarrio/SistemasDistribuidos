@@ -8,7 +8,7 @@ BROKER_HOST = os.getenv("BROKER_HOST", "localhost")
 BROKER_PORT = int(os.getenv("BROKER_PORT", 1883))
 
 TOPIC_CENTRAL = "central-computer"
-TOPICS_SUB = ["tractor", "truck"]
+TOPICS_SUB = ["cosechadoras", "asignaciones", "truck"]
 
 trucks = []
 

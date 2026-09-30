@@ -140,7 +140,7 @@
         "type": "mqtt in",
         "z": "f1526ff033517b8b",
         "name": "",
-        "topic": "tractor",
+        "topic": "cosechadoras",
         "qos": "1",
         "datatype": "auto-detect",
         "broker": "4d6e9f41f53da2bd",
@@ -148,7 +148,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 110,
+        "x": 130,
         "y": 200,
         "wires": [
             [
@@ -162,7 +162,7 @@
         "z": "f1526ff033517b8b",
         "name": "",
         "property": "payload",
-        "action": "",
+        "action": "obj",
         "pretty": false,
         "x": 290,
         "y": 200,
@@ -188,8 +188,8 @@
         "y": 200,
         "wires": [
             [
-                "53e00173f11b8bcf",
-                "630217dee00bc35e"
+                "630217dee00bc35e",
+                "53e00173f11b8bcf"
             ]
         ]
     },
@@ -198,7 +198,7 @@
         "type": "mqtt in",
         "z": "f1526ff033517b8b",
         "name": "",
-        "topic": "camiones",
+        "topic": "truck",
         "qos": "1",
         "datatype": "auto-detect",
         "broker": "4d6e9f41f53da2bd",
@@ -206,7 +206,7 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 120,
+        "x": 110,
         "y": 360,
         "wires": [
             [
@@ -220,7 +220,7 @@
         "z": "f1526ff033517b8b",
         "name": "",
         "property": "payload",
-        "action": "",
+        "action": "obj",
         "pretty": false,
         "x": 290,
         "y": 360,
@@ -246,8 +246,8 @@
         "y": 360,
         "wires": [
             [
-                "9dc31230e1f09c68",
-                "e7c55766f96a77f5"
+                "e7c55766f96a77f5",
+                "9dc31230e1f09c68"
             ]
         ]
     },
@@ -278,7 +278,7 @@
         "z": "f1526ff033517b8b",
         "name": "",
         "property": "payload",
-        "action": "",
+        "action": "str",
         "pretty": false,
         "x": 330,
         "y": 500,
@@ -336,7 +336,7 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 670,
+        "x": 650,
         "y": 180,
         "wires": [
             []
@@ -362,7 +362,7 @@
         "className": "",
         "value": "topic",
         "valueType": "msg",
-        "x": 670,
+        "x": 650,
         "y": 220,
         "wires": []
     },
@@ -414,8 +414,8 @@
         "styleRounded": true,
         "styleGlow": false,
         "className": "",
-        "x": 650,
-        "y": 360,
+        "x": 630,
+        "y": 340,
         "wires": [
             []
         ]
@@ -440,8 +440,8 @@
         "className": "",
         "value": "topic",
         "valueType": "msg",
-        "x": 650,
-        "y": 400,
+        "x": 630,
+        "y": 380,
         "wires": []
     },
     {

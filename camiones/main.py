@@ -12,8 +12,8 @@ def on_connect(client, userdata, flags, rc, properties=None):
     client.subscribe("central-computer", qos=1)
     
     # Ejemplo
-    p1 = {"id": 1, "pos": 70}
-    p2 = {"id": 2, "pos": 40}
+    p1 = {"id": 1, "pos": 70, "capacidad": 1}
+    p2 = {"id": 2, "pos": 40, "capacidad": 0}
     
     client.publish("truck", json.dumps(p1), qos=1)
     time.sleep(1)
