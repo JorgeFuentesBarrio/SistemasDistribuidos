@@ -32,9 +32,11 @@ services:
     restart: unless-stopped
     ports:
       - "1880:1880"
+    environment:
+      - FLOWS=/data_central/flows.json
     volumes:
       - nodered_data:/data
-      - ./flows.json:/data/flows.json
+      - .:/data_central
     depends_on:
       - mosquitto
       - mariadb
