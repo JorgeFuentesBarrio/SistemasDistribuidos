@@ -30,7 +30,7 @@ services:
 
   # 3. Node-RED (Dashboard y monitorización)
   nodered:
-    image: nodered/node-red:latest
+    build: ./node-red
     container_name: nodered
     restart: unless-stopped
     ports:
