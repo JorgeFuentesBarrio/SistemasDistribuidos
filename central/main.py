@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import random
 import paho.mqtt.client as mqtt
 import database
 
@@ -41,9 +42,9 @@ def on_message(client, userdata, msg):
             trucks.append({"id": vehiculo_id, "pos": posicion})
             database.guardar_telemetria("truck", vehiculo_id, posicion)
 
-        elif msg.topic == "tractor":
+        elif msg.topic == "cosechadoras":
             print(f"[CENTRAL] Petición de descarga (Cosechadora): {data}")
-            database.guardar_telemetria("tractor", vehiculo_id, posicion)
+            database.guardar_telemetria("cosechadoras", vehiculo_id, posicion)
 
             if len(trucks) == 0:
                 respuesta = {
@@ -74,7 +75,7 @@ def on_message(client, userdata, msg):
                     "distancia": minimum,
                     "mensaje": f"Camión {selected_truck['id']} asignado a cosechadora {vehiculo_id}"
                 }
-                client.publish(TOPIC_CENTRAL, json.dumps(respuesta), qos=1)
+                client.publish("asignaciones", json.dumps(respuesta), qos=1)
                 print(f"[CENTRAL] Asignación completada: {respuesta}")
 
     except Exception as e:

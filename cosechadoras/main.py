@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import time
 import paho.mqtt.client as mqtt
 
@@ -20,16 +21,18 @@ def on_connect(client, userdata, flags, rc, properties=None):
 def on_message(client, userdata, msg):
     global tolva
     try:
-        texto = msg.payload.decode("utf-8")
+        mensaje = json.loads(msg.payload.decode("utf-8"))
+        texto = mensaje["mensaje"]
         print(f"[COSECHADORA {ID}] Mensaje recibido de la central: {texto}")
         
         # Procesar asignación 
-        if f"tractor {ID}" in texto.lower() or f'"tractor_id": {ID}' in texto:
-            if "truck" in texto.lower() or "asignado" in texto.lower():
-                print(f"[COSECHADORA {ID}] Camión asignado -> Descargando tolva...")
-                time.sleep(2)
-                tolva = 0
-                print(f"[COSECHADORA {ID}] Descarga completada. Tolva al 0%.")
+        if f"cosechadora {ID}" in texto.lower() or f'"cosechadora_id": {ID}' in texto:
+            if "camion" in texto.lower() or "asignado" in texto.lower():
+                if tolva > 80:
+                    print(f"[COSECHADORA {ID}] Camión asignado -> Descargando tolva...")
+                    time.sleep(2)
+                    tolva = 0
+                    print(f"[COSECHADORA {ID}] Descarga completada. Tolva al 0%.")
     except Exception as e:
         print(f"[COSECHADORA {ID}] Error leyendo mensaje: {e}")
 
@@ -53,9 +56,10 @@ try:
             "id": ID,
             "pos": posicion,
             "carga": tolva,
-            "solicita_descarga": tolva >= 80
+            "solicita_descarga": 1
         }
-        client.publish(TOPIC_PUB, json.dumps(peticion), qos=1)
+        if tolva > 80:
+            client.publish(TOPIC_PUB, json.dumps(peticion), qos=1)
         
         time.sleep(3)  
 

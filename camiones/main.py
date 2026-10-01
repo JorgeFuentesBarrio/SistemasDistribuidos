@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import random
 import paho.mqtt.client as mqtt
 
 BROKER_HOST = os.getenv("BROKER_HOST", "localhost")
