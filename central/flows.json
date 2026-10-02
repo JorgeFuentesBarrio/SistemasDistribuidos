@@ -316,20 +316,20 @@
                 "textType": "label"
             },
             {
-                "from": "4",
+                "from": "80",
                 "color": "#ffc800",
                 "text": "",
                 "textType": "label"
             },
             {
-                "from": "7",
+                "from": "90",
                 "color": "#ea5353",
                 "text": "",
                 "textType": "label"
             }
         ],
         "min": 0,
-        "max": 10,
+        "max": "100",
         "sizeThickness": 16,
         "sizeGap": 4,
         "sizeKeyThickness": 8,
