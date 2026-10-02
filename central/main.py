@@ -61,6 +61,7 @@ def on_message(client, userdata, msg):
         vehiculo_id = data.get("id")
         posicion = data.get("pos")
         capacidad = data.get("capacidad")
+        solicita_descarga = data.get("solicita_descarga")
         if msg.topic == "truck":
             print(f"[CENTRAL] Camión reportado: {data}")
             with trucks_lock:
@@ -73,40 +74,41 @@ def on_message(client, userdata, msg):
         elif msg.topic == "cosechadoras":
             print(f"[CENTRAL] Petición de descarga (Cosechadora): {data}")
             database.guardar_telemetria("cosechadoras", vehiculo_id, posicion)
-            if len(trucks) == 0 or len(camiones_disponibles(trucks)) == 0:
-                respuesta = {
-                    "tipo": "ERROR",
-                    "mensaje": f"No hay camiones disponibles para la cosechadora {vehiculo_id}."
-                }
-                client.publish(TOPIC_CENTRAL, json.dumps(respuesta), qos=1)
-                client.publish("TOPIC_CENTRAL", json.dumps(respuesta), qos=1)
-                print(f"[CENTRAL] Sin unidades disponibles para {vehiculo_id}")
-            else:
-                minimum = float("+inf")
-                selected_truck = None
-                with trucks_lock:
-                    for truck in trucks:
-                        distancia = abs(posicion - truck["pos"])
-                        if distancia < minimum:
-                            minimum = distancia
-                            selected_truck = truck
-                            disponibilizar_camion(trucks, selected_truck["id"], 0)
+            if solicita_descarga == 1:
+                if len(trucks) == 0 or len(camiones_disponibles(trucks)) == 0:
+                    respuesta = {
+                        "tipo": "ERROR",
+                        "mensaje": f"No hay camiones disponibles para la cosechadora {vehiculo_id}."
+                    }
+                    client.publish(TOPIC_CENTRAL, json.dumps(respuesta), qos=1)
+                    client.publish("TOPIC_CENTRAL", json.dumps(respuesta), qos=1)
+                    print(f"[CENTRAL] Sin unidades disponibles para {vehiculo_id}")
+                else:
+                    minimum = float("+inf")
+                    selected_truck = None
+                    with trucks_lock:
+                        for truck in trucks:
+                            distancia = abs(posicion - truck["pos"])
+                            if distancia < minimum:
+                                minimum = distancia
+                                selected_truck = truck
+                                disponibilizar_camion(trucks, selected_truck["id"], 0)
 
-                database.registrar_mision(
-                    cosechadora_id=vehiculo_id,
-                    camion_id=selected_truck["id"],
-                    distancia=minimum
-                )
+                    database.registrar_mision(
+                        cosechadora_id=vehiculo_id,
+                        camion_id=selected_truck["id"],
+                        distancia=minimum
+                    )
 
-                respuesta = {
-                    "tipo": "ASIGNACION",
-                    "cosechadora_id": vehiculo_id,
-                    "camion_id": selected_truck["id"],
-                    "distancia": minimum,
-                    "mensaje": f"Camión {selected_truck['id']} asignado a cosechadora {vehiculo_id}"
-                }
-                client.publish("asignaciones", json.dumps(respuesta), qos=1)
-                print(f"[CENTRAL] Asignación completada: {respuesta}")
+                    respuesta = {
+                        "tipo": "ASIGNACION",
+                        "cosechadora_id": vehiculo_id,
+                        "camion_id": selected_truck["id"],
+                        "distancia": minimum,
+                        "mensaje": f"Camión {selected_truck['id']} asignado a cosechadora {vehiculo_id}"
+                    }
+                    client.publish("asignaciones", json.dumps(respuesta), qos=1)
+                    print(f"[CENTRAL] Asignación completada: {respuesta}")
 
     except Exception as e:
         print(f"[CENTRAL] Error procesando payload entrante: {e}")

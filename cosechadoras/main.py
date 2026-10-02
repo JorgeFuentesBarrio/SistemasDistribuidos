@@ -56,10 +56,9 @@ try:
             "id": ID,
             "pos": posicion,
             "carga": tolva,
-            "solicita_descarga": 1
+            "solicita_descarga":  1 if tolva > 80 else 0
         }
-        if tolva > 80:
-            client.publish(TOPIC_PUB, json.dumps(peticion), qos=1)
+        client.publish(TOPIC_PUB, json.dumps(peticion), qos=1)
         
         time.sleep(3)  
 
