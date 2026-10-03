@@ -1,5 +1,50 @@
 [
     {
+        "id": "tab_layout_split_final",
+        "type": "tab",
+        "label": "GESTION COSECHA DIVIDIDA",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "sub_multi_cosechadoras",
+        "type": "mqtt in",
+        "z": "tab_layout_split_final",
+        "name": "Sub cosechadoras",
+        "topic": "cosechadoras",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_flota_real",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "json_multi_cos"
+            ]
+        ]
+    },
+    {
+        "id": "json_multi_cos",
+        "type": "json",
+        "z": "tab_layout_split_final",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 310,
+        "y": 100,
+        "wires": [
+            [
+                "func_multi_cos"
+            ]
+        ]
+    },
+    {
         "id": "func_multi_cos",
         "type": "function",
         "z": "tab_layout_split_final",
@@ -21,5 +66,281 @@
                 "ui_card_cosechadoras_multi"
             ]
         ]
+    },
+    {
+        "id": "ui_map_embed_box_multi",
+        "type": "ui_template",
+        "z": "tab_layout_split_final",
+        "group": "grp_flota_mapa",
+        "name": "Visor Mapa Izquierda",
+        "order": 1,
+        "width": "7",
+        "height": "12",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; height: 100%; box-sizing: border-box;\">\n  <div style=\"font-size: 13px; font-weight: bold; color: #1565c0; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>📍 Supervisión GPS de Parcela</span>\n    <span style=\"font-size: 11px;\">🟢 Cosechadora | 🔴 Alerta | ⚪ Camión</span>\n  </div>\n  <iframe src=\"/worldmap\" style=\"width: 100%; height: 500px; border: 1px solid #bbdefb; border-radius: 3px;\"></iframe>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 770,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_card_cosechadoras_multi",
+        "type": "ui_template",
+        "z": "tab_layout_split_final",
+        "group": "grp_flota_cosechadoras",
+        "name": "Lista Flota Cosechadoras",
+        "order": 1,
+        "width": "5",
+        "height": "4",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Cosechadoras</span>\n    <span>Activas: {{contar(cosechadoras)}}</span>\n  </div>\n  <div ng-if=\"!contar(cosechadoras)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de cosechadoras\n  </div>\n  <div ng-repeat=\"(id, c) in cosechadoras\" style=\"padding: 5px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <div style=\"display: flex; justify-content: space-between; align-items: center;\">\n      <span><strong>Cosechadora #{{c.id}}</strong> (Pos: {{c.pos}})</span>\n      <span ng-if=\"c.alerta\" style=\"color: #c62828; font-weight: bold;\">Pide vaciado ({{c.carga}}%)</span>\n      <span ng-if=\"!c.alerta\" style=\"color: #2e7d32; font-weight: bold;\">Cosechando ({{c.carga}}%)</span>\n    </div>\n    <div style=\"background: #e0e0e0; border-radius: 3px; height: 6px; width: 100%; margin-top: 3px; overflow: hidden;\">\n      <div ng-style=\"{'width': c.carga + '%', 'background-color': c.alerta ? '#c62828' : '#2e7d32'}\" style=\"height: 100%; transition: width 0.4s;\"></div>\n    </div>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.cosechadoras = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.cosechadoras[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 780,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "sub_multi_camiones",
+        "type": "mqtt in",
+        "z": "tab_layout_split_final",
+        "name": "Sub truck",
+        "topic": "truck",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_flota_real",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 110,
+        "y": 200,
+        "wires": [
+            [
+                "json_multi_truck"
+            ]
+        ]
+    },
+    {
+        "id": "json_multi_truck",
+        "type": "json",
+        "z": "tab_layout_split_final",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 310,
+        "y": 200,
+        "wires": [
+            [
+                "func_multi_truck"
+            ]
+        ]
+    },
+    {
+        "id": "func_multi_truck",
+        "type": "function",
+        "z": "tab_layout_split_final",
+        "name": "Procesar Camión",
+        "func": "let d = msg.payload;\nlet id = d.id || 1;\nlet pos = Number(d.pos) || 70;\nlet libre = (d.capacidad === 1);\n\nlet latBase = 40.4164;\nlet lonBase = -3.7032;\nlet lat = d.lat || (latBase + (pos * 0.00003));\nlet lon = d.lon || (lonBase + (pos * 0.00004));\n\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"circle\",\n        iconColor: \"grey\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"En transporte\") + \" | Pos: \" + pos\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        pos: pos,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
+        "outputs": 2,
+        "x": 510,
+        "y": 200,
+        "wires": [
+            [
+                "nodo_worldmap_engine_multi"
+            ],
+            [
+                "ui_card_camiones_multi"
+            ]
+        ]
+    },
+    {
+        "id": "ui_card_camiones_multi",
+        "type": "ui_template",
+        "z": "tab_layout_split_final",
+        "group": "grp_flota_camiones",
+        "name": "Lista Flota Camiones",
+        "order": 1,
+        "width": "5",
+        "height": "4",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Camiones</span>\n    <span>Activos: {{contar(camiones)}}</span>\n  </div>\n  <div ng-if=\"!contar(camiones)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de camiones\n  </div>\n  <div ng-repeat=\"(id, c) in camiones\" style=\"padding: 6px 0; border-bottom: 1px dotted #e0e0e0; display: flex; justify-content: space-between; align-items: center;\">\n    <span><strong>Camión #{{c.id}}</strong> (Pos: {{c.pos}})</span>\n    <span ng-if=\"c.libre\" style=\"color: #1565c0; font-weight: bold;\">● Disponible</span>\n    <span ng-if=\"!c.libre\" style=\"color: #e65100; font-weight: bold;\">● Ocupado</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.camiones = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.camiones[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 760,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "nodo_worldmap_engine_multi",
+        "type": "worldmap",
+        "z": "tab_layout_split_final",
+        "name": "Motor GPS",
+        "lat": "40.4168",
+        "lon": "-3.7038",
+        "zoom": "17",
+        "layer": "Esri Satellite",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "hide",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "true",
+        "coords": "none",
+        "showgrid": "false",
+        "allowFileDrop": "false",
+        "path": "/worldmap",
+        "x": 750,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "sub_multi_asig",
+        "type": "mqtt in",
+        "z": "tab_layout_split_final",
+        "name": "Sub asignaciones",
+        "topic": "asignaciones",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_flota_real",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 300,
+        "wires": [
+            [
+                "json_multi_asig"
+            ]
+        ]
+    },
+    {
+        "id": "json_multi_asig",
+        "type": "json",
+        "z": "tab_layout_split_final",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 310,
+        "y": 300,
+        "wires": [
+            [
+                "ui_card_asig_multi"
+            ]
+        ]
+    },
+    {
+        "id": "ui_card_asig_multi",
+        "type": "ui_template",
+        "z": "tab_layout_split_final",
+        "group": "grp_flota_asignaciones",
+        "name": "Historial de Asignaciones",
+        "order": 1,
+        "width": "5",
+        "height": "4",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 11px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px;\">\n    Historial de la central\n  </div>\n  <div ng-if=\"!eventos.length\" style=\"color: #777; font-style: italic; padding-top: 25px; text-align: center;\">\n    Sin órdenes recibidas\n  </div>\n  <div ng-repeat=\"e in eventos track by $index\" style=\"padding: 3px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <span style=\"color: #666;\">[{{e.hora}}]</span>\n    <span ng-if=\"e.tipo === 'ERROR'\" style=\"color: #c62828; font-weight: bold;\">(Aviso)</span>\n    <span ng-if=\"e.tipo !== 'ERROR'\" style=\"color: #2e7d32; font-weight: bold;\">(OK)</span>\n    <span>{{e.texto}}</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.eventos = scope.eventos || [];\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload) {\n      var d = msg.payload;\n      var texto = (typeof d === 'string') ? d : (d.mensaje || JSON.stringify(d));\n      var hora = new Date().toLocaleTimeString();\n      var tipo = d.tipo || 'OK';\n      scope.eventos.unshift({ hora: hora, texto: texto, tipo: tipo });\n      if (scope.eventos.length > 20) scope.eventos.pop();\n    }\n  });\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 530,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "broker_flota_real",
+        "type": "mqtt-broker",
+        "name": "Mosquitto Local",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "nodered_split_monitor",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true
+    },
+    {
+        "id": "grp_flota_mapa",
+        "type": "ui_group",
+        "name": "mapa",
+        "tab": "ui_tab_flota_main",
+        "order": 1,
+        "disp": false,
+        "width": "7",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "grp_flota_cosechadoras",
+        "type": "ui_group",
+        "name": "cosechadoras",
+        "tab": "ui_tab_flota_main",
+        "order": 2,
+        "disp": true,
+        "width": "5",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "grp_flota_camiones",
+        "type": "ui_group",
+        "name": "camiones",
+        "tab": "ui_tab_flota_main",
+        "order": 3,
+        "disp": true,
+        "width": "5",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "grp_flota_asignaciones",
+        "type": "ui_group",
+        "name": "asignaciones",
+        "tab": "ui_tab_flota_main",
+        "order": 4,
+        "disp": true,
+        "width": "5",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ui_tab_flota_main",
+        "type": "ui_tab",
+        "name": "Panel de Cosecha",
+        "icon": "agriculture",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "81bfbd1a5e462df2",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6",
+            "node-red-contrib-web-worldmap": "5.8.1"
+        }
     }
 ]
