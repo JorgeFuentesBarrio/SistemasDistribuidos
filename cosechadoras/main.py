@@ -12,7 +12,9 @@ TOPIC_PUB = "cosechadoras"
 TOPIC_SUB = "asignaciones"
 
 tolva = 0  
-posicion = 100  
+
+lat = 38.475200
+lon = -4.968500
 
 def on_connect(client, userdata, flags, rc, properties=None):
     print(f"[COSECHADORA {ID}] Conectada al broker en {BROKER_HOST}:{BROKER_PORT}")
@@ -54,7 +56,8 @@ try:
 
         peticion = {
             "id": ID,
-            "pos": posicion,
+            "lat": round(lat, 6),
+            "lon": round(lon, 6),
             "carga": tolva,
             "solicita_descarga":  1 if tolva > 80 else 0
         }
