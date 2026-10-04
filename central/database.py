@@ -37,7 +37,8 @@ def init_db():
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 tipo_vehiculo VARCHAR(20) NOT NULL,
                 vehiculo_id VARCHAR(10) NOT NULL,
-                posicion FLOAT NOT NULL,
+                lat FLOAT NOT NULL,
+                lon FLOAT NOT NULL,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             """)
@@ -45,12 +46,12 @@ def init_db():
     finally:
         conn.close()
 
-def guardar_telemetria(tipo_vehiculo, vehiculo_id, posicion):
+def guardar_telemetria(tipo_vehiculo, vehiculo_id, lat, lon):
     conn = obtener_conexion()
     try:
         with conn.cursor() as cursor:
-            sql = "INSERT INTO telemetria (tipo_vehiculo, vehiculo_id, posicion) VALUES (%s, %s, %s)"
-            cursor.execute(sql, (tipo_vehiculo, str(vehiculo_id), float(posicion)))
+            sql = "INSERT INTO telemetria (tipo_vehiculo, vehiculo_id, lat, lon) VALUES (%s, %s, %s, %s)"
+            cursor.execute(sql, (tipo_vehiculo, str(vehiculo_id), float(lat), float(lon)))
     finally:
         conn.close()
 
