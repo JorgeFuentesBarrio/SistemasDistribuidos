@@ -22,7 +22,6 @@ cosechadoras_atendidas = {}    # cosechadora_id -> camion_id
 cosechadoras_pos = {}
 cola_espera = []              # para cosechadoras pendientes de camión
 
-
 def wait_db():
     reintentos = 15
     while reintentos > 0:
@@ -30,7 +29,7 @@ def wait_db():
             database.init_db()
             break
         except Exception as e:
-            print(f"[CENTRAL] Esperando a que MariaDB esté lista... reintentando en 2s ({e})")
+            print(f"[CENTRAL] Esperando al cluster CockroachDB... reintentando en 2s ({e})")
             time.sleep(2)
             reintentos -= 1
 
