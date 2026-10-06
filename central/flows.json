@@ -257,8 +257,8 @@
         "id": "sub_multi_camiones",
         "type": "mqtt in",
         "z": "tab_layout_split_final",
-        "name": "Sub truck",
-        "topic": "truck",
+        "name": "Sub camiones",
+        "topic": "camiones",
         "qos": "1",
         "datatype": "auto-detect",
         "broker": "broker_flota_real",
@@ -270,12 +270,12 @@
         "y": 200,
         "wires": [
             [
-                "json_multi_truck"
+                "json_multi_camiones"
             ]
         ]
     },
     {
-        "id": "json_multi_truck",
+        "id": "json_multi_camiones",
         "type": "json",
         "z": "tab_layout_split_final",
         "name": "",
@@ -286,16 +286,16 @@
         "y": 200,
         "wires": [
             [
-                "func_multi_truck"
+                "func_multi_camiones"
             ]
         ]
     },
     {
-        "id": "func_multi_truck",
+        "id": "func_multi_camiones",
         "type": "function",
         "z": "tab_layout_split_final",
         "name": "Procesar Camión",
-        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        node.error(\"Error parseando JSON: \" + e.message);\n        return null;\n    }\n}\n\nif (d && d.payload && typeof d.payload === \"object\") {\n    d = d.payload;\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet libre = (Number(d.capacidad) === 1);\n\n// 1. Salida para Worldmap\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"fa-truck\",\n        iconColor: libre ? \"blue\" : \"orange\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"En ruta a misión\")\n    }\n};\n\n// 2. Salida para Card / Dashboard\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        capacidad: d.capacidad,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
+        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        node.error(\"Error parseando JSON: \" + e.message);\n        return null;\n    }\n}\n\nif (d && d.payload && typeof d.payload === \"object\") {\n    d = d.payload;\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet libre = (Number(d.capacidad) === 1);\n\n// 1. Salida para Worldmap\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"fa-camiones\",\n        iconColor: libre ? \"blue\" : \"orange\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"En ruta a misión\")\n    }\n};\n\n// 2. Salida para Card / Dashboard\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        capacidad: d.capacidad,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
         "outputs": 2,
         "timeout": "",
         "noerr": 0,
