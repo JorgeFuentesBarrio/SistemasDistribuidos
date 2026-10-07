@@ -11,7 +11,7 @@
         "id": "broker_flota_real",
         "type": "mqtt-broker",
         "name": "Mosquitto Local",
-        "broker": "mosquitto",
+        "broker": "localhost",
         "port": "1883",
         "clientid": "nodered_split_monitor",
         "autoConnect": true,
@@ -19,29 +19,7 @@
         "protocolVersion": "4",
         "keepalive": "60",
         "cleansession": true,
-        "autoUnsubscribe": true,
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthPayload": "",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willPayload": "",
-        "willMsg": {},
-        "userProps": "",
-        "sessionExpiry": ""
-    },
-    {
-        "id": "81bfbd1a5e462df2",
-        "type": "global-config",
-        "env": [],
-        "modules": {
-            "node-red-dashboard": "3.6.6",
-            "node-red-contrib-web-worldmap": "5.8.1"
-        }
+        "autoUnsubscribe": true
     },
     {
         "id": "ui_tab_flota_main",
@@ -97,7 +75,7 @@
         "className": ""
     },
     {
-        "id": "8a944fa6692d2a06",
+        "id": "227896b86e6065df",
         "type": "ui_base",
         "theme": {
             "name": "theme-light",
@@ -205,8 +183,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 130,
-        "y": 100,
+        "x": 210,
+        "y": 280,
         "wires": [
             [
                 "json_multi_cos"
@@ -221,8 +199,8 @@
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 310,
-        "y": 100,
+        "x": 390,
+        "y": 280,
         "wires": [
             [
                 "func_multi_cos"
@@ -234,19 +212,13 @@
         "type": "function",
         "z": "tab_layout_split_final",
         "name": "Procesar Cosechadora",
-        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        node.error(\"Error parseando JSON en cosechadora: \" + e.message);\n        return null;\n    }\n}\n\nif (d && d.payload && typeof d.payload === \"object\") {\n    d = d.payload;\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet carga = Number(d.carga) || 0;\nlet alerta = (Number(d.solicita_descarga) === 1 || carga >= 80);\n\nlet msgMapa = {\n    payload: {\n        name: \"Cosechadora \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"fa-circle\",\n        iconColor: alerta ? \"red\" : \"green\",\n        layer: \"Cosechadoras\",\n        tooltip: \"Cosechadora \" + id + \" | Tolva: \" + carga + \"%\" + (alerta ? \" (VACIADO)\" : \"\")\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        carga: carga,\n        alerta: alerta\n    }\n};\n\nreturn [msgMapa, msgCard];",
+        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        return null;\n    }\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet carga = Number(d.carga) || 0;\nlet alerta = (Number(d.solicita_descarga) === 1 || carga >= 80);\n\nlet msgMapa = {\n    payload: {\n        name: \"Cosechadora \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"circle\",\n        iconColor: alerta ? \"red\" : \"green\",\n        layer: \"Cosechadoras\",\n        tooltip: \"Cosechadora \" + id + \" | Tolva: \" + carga + \"%\" + (alerta ? \" (VACIADO)\" : \"\")\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        carga: carga,\n        alerta: alerta\n    }\n};\n\nreturn [msgMapa, msgCard];",
         "outputs": 2,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 510,
-        "y": 100,
+        "x": 570,
+        "y": 280,
         "wires": [
             [
-                "nodo_worldmap_engine_multi",
-                "b753c5fdf907de10"
+                "nodo_worldmap_engine_multi"
             ],
             [
                 "ui_card_cosechadoras_multi"
@@ -257,7 +229,7 @@
         "id": "sub_multi_camiones",
         "type": "mqtt in",
         "z": "tab_layout_split_final",
-        "name": "Sub truck",
+        "name": "Sub camiones",
         "topic": "truck",
         "qos": "1",
         "datatype": "auto-detect",
@@ -266,48 +238,42 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 110,
-        "y": 200,
+        "x": 210,
+        "y": 380,
         "wires": [
             [
-                "json_multi_truck"
+                "json_multi_camiones"
             ]
         ]
     },
     {
-        "id": "json_multi_truck",
+        "id": "json_multi_camiones",
         "type": "json",
         "z": "tab_layout_split_final",
         "name": "",
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 310,
-        "y": 200,
+        "x": 390,
+        "y": 380,
         "wires": [
             [
-                "func_multi_truck"
+                "func_multi_camiones"
             ]
         ]
     },
     {
-        "id": "func_multi_truck",
+        "id": "func_multi_camiones",
         "type": "function",
         "z": "tab_layout_split_final",
         "name": "Procesar Camión",
-        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        node.error(\"Error parseando JSON en camión: \" + e.message);\n        return null;\n    }\n}\n\nif (d && d.payload && typeof d.payload === \"object\") {\n    d = d.payload;\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet libre = (Number(d.capacidad) === 1);\n\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"fa-truck\",\n        iconColor: libre ? \"blue\" : \"orange\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"Ocupado / Ruta\")\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        capacidad: d.capacidad,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
+        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        return null;\n    }\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet libre = (Number(d.capacidad) === 1);\n\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"truck\",\n        iconColor: libre ? \"blue\" : \"orange\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"En ruta / Ocupado\")\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
         "outputs": 2,
-        "timeout": "",
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 510,
-        "y": 200,
+        "x": 570,
+        "y": 380,
         "wires": [
             [
-                "nodo_worldmap_engine_multi",
-                "c8cb605e581570fb"
+                "nodo_worldmap_engine_multi"
             ],
             [
                 "ui_card_camiones_multi"
@@ -327,8 +293,8 @@
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 130,
-        "y": 300,
+        "x": 230,
+        "y": 480,
         "wires": [
             [
                 "json_multi_asig"
@@ -343,8 +309,8 @@
         "property": "payload",
         "action": "",
         "pretty": false,
-        "x": 310,
-        "y": 300,
+        "x": 390,
+        "y": 480,
         "wires": [
             [
                 "ui_card_asig_multi"
@@ -360,14 +326,14 @@
         "order": 1,
         "width": "7",
         "height": "12",
-        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; height: 100%; box-sizing: border-box;\">\n  <div style=\"font-size: 13px; font-weight: bold; color: #1565c0; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>📍 Supervisión GPS de Parcela</span>\n    <span style=\"font-size: 11px;\">🟢 Cosechadora | 🔴 Alerta | ⚪ Camión</span>\n  </div>\n  <iframe src=\"/worldmap\" style=\"width: 100%; height: 500px; border: 1px solid #bbdefb; border-radius: 3px;\"></iframe>\n</div>",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; height: 100%; box-sizing: border-box;\">\n  <div style=\"font-size: 13px; font-weight: bold; color: #1565c0; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>📍 Supervisión GPS de Parcela</span>\n    <span style=\"font-size: 11px;\">🟢 Cosechando | 🔴 Pide vaciado | 🔵 Camión libre | 🟠 Ocupado</span>\n  </div>\n  <iframe src=\"/worldmap\" style=\"width: 100%; height: 500px; border: 1px solid #bbdefb; border-radius: 3px;\"></iframe>\n</div>",
         "storeOutMessages": true,
         "fwdInMessages": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 770,
-        "y": 60,
+        "x": 860,
+        "y": 240,
         "wires": [
             []
         ]
@@ -381,14 +347,14 @@
         "order": 1,
         "width": "5",
         "height": "4",
-        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Cosechadoras</span>\n    <span>Activas: {{contar(cosechadoras)}}</span>\n  </div>\n  <div ng-if=\"!contar(cosechadoras)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de cosechadoras\n  </div>\n  <div ng-repeat=\"(id, c) in cosechadoras\" style=\"padding: 5px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <div style=\"display: flex; justify-content: space-between; align-items: center;\">\n      <span><strong>Cosechadora #{{c.id}}</strong> (Pos: {{c.pos}})</span>\n      <span ng-if=\"c.alerta\" style=\"color: #c62828; font-weight: bold;\">Pide vaciado ({{c.carga}}%)</span>\n      <span ng-if=\"!c.alerta\" style=\"color: #2e7d32; font-weight: bold;\">Cosechando ({{c.carga}}%)</span>\n    </div>\n    <div style=\"background: #e0e0e0; border-radius: 3px; height: 6px; width: 100%; margin-top: 3px; overflow: hidden;\">\n      <div ng-style=\"{'width': c.carga + '%', 'background-color': c.alerta ? '#c62828' : '#2e7d32'}\" style=\"height: 100%; transition: width 0.4s;\"></div>\n    </div>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.cosechadoras = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.cosechadoras[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Cosechadoras</span>\n    <span>Activas: {{contar(cosechadoras)}}</span>\n  </div>\n  <div ng-if=\"!contar(cosechadoras)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de cosechadoras\n  </div>\n  <div ng-repeat=\"(id, c) in cosechadoras\" style=\"padding: 5px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <div style=\"display: flex; justify-content: space-between; align-items: center;\">\n      <span><strong>Cosechadora #{{c.id}}</strong></span>\n      <span ng-if=\"c.alerta\" style=\"color: #c62828; font-weight: bold;\">Pide vaciado ({{c.carga}}%)</span>\n      <span ng-if=\"!c.alerta\" style=\"color: #2e7d32; font-weight: bold;\">Cosechando ({{c.carga}}%)</span>\n    </div>\n    <div style=\"background: #e0e0e0; border-radius: 3px; height: 6px; width: 100%; margin-top: 3px; overflow: hidden;\">\n      <div ng-style=\"{'width': c.carga + '%', 'background-color': c.alerta ? '#c62828' : '#2e7d32'}\" style=\"height: 100%; transition: width 0.4s;\"></div>\n    </div>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.cosechadoras = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.cosechadoras[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
         "storeOutMessages": true,
         "fwdInMessages": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 780,
-        "y": 120,
+        "x": 870,
+        "y": 300,
         "wires": [
             []
         ]
@@ -402,14 +368,14 @@
         "order": 1,
         "width": "5",
         "height": "4",
-        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Camiones</span>\n    <span>Activos: {{contar(camiones)}}</span>\n  </div>\n  <div ng-if=\"!contar(camiones)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de camiones\n  </div>\n  <div ng-repeat=\"(id, c) in camiones\" style=\"padding: 6px 0; border-bottom: 1px dotted #e0e0e0; display: flex; justify-content: space-between; align-items: center;\">\n    <span><strong>Camión #{{c.id}}</strong> (Pos: {{c.pos}})</span>\n    <span ng-if=\"c.libre\" style=\"color: #1565c0; font-weight: bold;\">● Disponible</span>\n    <span ng-if=\"!c.libre\" style=\"color: #e65100; font-weight: bold;\">● Ocupado</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.camiones = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.camiones[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Camiones</span>\n    <span>Activos: {{contar(camiones)}}</span>\n  </div>\n  <div ng-if=\"!contar(camiones)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de camiones\n  </div>\n  <div ng-repeat=\"(id, c) in camiones\" style=\"padding: 6px 0; border-bottom: 1px dotted #e0e0e0; display: flex; justify-content: space-between; align-items: center;\">\n    <span><strong>Camión #{{c.id}}</strong></span>\n    <span ng-if=\"c.libre\" style=\"color: #1565c0; font-weight: bold;\">● Disponible</span>\n    <span ng-if=\"!c.libre\" style=\"color: #e65100; font-weight: bold;\">● Ocupado</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.camiones = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.camiones[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
         "storeOutMessages": true,
         "fwdInMessages": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 760,
-        "y": 200,
+        "x": 860,
+        "y": 380,
         "wires": [
             []
         ]
@@ -423,14 +389,14 @@
         "order": 1,
         "width": "5",
         "height": "4",
-        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 11px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px;\">\n    Historial de la central\n  </div>\n  <div ng-if=\"!eventos.length\" style=\"color: #777; font-style: italic; padding-top: 25px; text-align: center;\">\n    Sin órdenes recibidas\n  </div>\n  <div ng-repeat=\"e in eventos track by $index\" style=\"padding: 3px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <span style=\"color: #666;\">[{{e.hora}}]</span>\n    <span ng-if=\"e.tipo === 'ERROR'\" style=\"color: #c62828; font-weight: bold;\">(Aviso)</span>\n    <span ng-if=\"e.tipo !== 'ERROR'\" style=\"color: #2e7d32; font-weight: bold;\">(OK)</span>\n    <span>{{e.texto}}</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.eventos = scope.eventos || [];\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload) {\n      var d = msg.payload;\n      var texto = (typeof d === 'string') ? d : (d.mensaje || JSON.stringify(d));\n      var hora = new Date().toLocaleTimeString();\n      var tipo = d.tipo || 'OK';\n      scope.eventos.unshift({ hora: hora, texto: texto, tipo: tipo });\n      if (scope.eventos.length > 20) scope.eventos.pop();\n    }\n  });\n})(scope);\n</script>",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 11px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px;\">\n    Historial de la central\n  </div>\n  <div ng-if=\"!eventos.length\" style=\"color: #777; font-style: italic; padding-top: 25px; text-align: center;\">\n    Sin órdenes recibidas\n  </div>\n  <div ng-repeat=\"e in eventos track by $index\" style=\"padding: 3px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <span style=\"color: #666;\">[{{e.hora}}]</span>\n    <span ng-if=\"e.tipo === 'ERROR' || e.tipo === 'COLA'\" style=\"color: #c62828; font-weight: bold;\">(Aviso)</span>\n    <span ng-if=\"e.tipo !== 'ERROR' && e.tipo !== 'COLA'\" style=\"color: #2e7d32; font-weight: bold;\">(OK)</span>\n    <span>{{e.texto}}</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.eventos = scope.eventos || [];\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload) {\n      var d = msg.payload;\n      var texto = (typeof d === 'string') ? d : (d.mensaje || JSON.stringify(d));\n      var hora = new Date().toLocaleTimeString();\n      var tipo = d.tipo || 'OK';\n      scope.eventos.unshift({ hora: hora, texto: texto, tipo: tipo });\n      if (scope.eventos.length > 20) scope.eventos.pop();\n    }\n  });\n})(scope);\n</script>",
         "storeOutMessages": true,
         "fwdInMessages": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 530,
-        "y": 300,
+        "x": 600,
+        "y": 480,
         "wires": [
             []
         ]
@@ -442,7 +408,7 @@
         "name": "Motor GPS",
         "lat": "38.4716",
         "lon": "-4.971538",
-        "zoom": "17",
+        "zoom": "13",
         "layer": "OSMG",
         "cluster": "",
         "maxage": "",
@@ -462,40 +428,8 @@
         "mapurl": "",
         "mapopt": "",
         "mapwms": false,
-        "x": 750,
-        "y": 20,
-        "wires": []
-    },
-    {
-        "id": "b753c5fdf907de10",
-        "type": "debug",
-        "z": "tab_layout_split_final",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 640,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "c8cb605e581570fb",
-        "type": "debug",
-        "z": "tab_layout_split_final",
-        "name": "debug 2",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 700,
-        "y": 420,
+        "x": 840,
+        "y": 180,
         "wires": []
     }
 ]

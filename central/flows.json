@@ -1,299 +1,448 @@
 [
-  {
-    "id": "tab_layout_split_final",
-    "type": "tab",
-    "label": "GESTION COSECHA DIVIDIDA",
-    "disabled": false,
-    "info": "",
-    "env": []
-  },
-  {
-    "id": "sub_multi_cosechadoras",
-    "type": "mqtt in",
-    "z": "tab_layout_split_final",
-    "name": "Sub cosechadoras",
-    "topic": "cosechadoras",
-    "qos": "1",
-    "datatype": "auto-detect",
-    "broker": "broker_flota_real",
-    "nl": false,
-    "rap": true,
-    "rh": 0,
-    "inputs": 0,
-    "x": 210,
-    "y": 280,
-    "wires": [["json_multi_cos"]]
-  },
-  {
-    "id": "json_multi_cos",
-    "type": "json",
-    "z": "tab_layout_split_final",
-    "name": "",
-    "property": "payload",
-    "action": "",
-    "pretty": false,
-    "x": 390,
-    "y": 280,
-    "wires": [["func_multi_cos"]]
-  },
-  {
-    "id": "func_multi_cos",
-    "type": "function",
-    "z": "tab_layout_split_final",
-    "name": "Procesar Cosechadora",
-    "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        return null;\n    }\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet carga = Number(d.carga) || 0;\nlet alerta = (Number(d.solicita_descarga) === 1 || carga >= 80);\n\nlet msgMapa = {\n    payload: {\n        name: \"Cosechadora \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"circle\",\n        iconColor: alerta ? \"red\" : \"green\",\n        layer: \"Cosechadoras\",\n        tooltip: \"Cosechadora \" + id + \" | Tolva: \" + carga + \"%\" + (alerta ? \" (VACIADO)\" : \"\")\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        carga: carga,\n        alerta: alerta\n    }\n};\n\nreturn [msgMapa, msgCard];",
-    "outputs": 2,
-    "x": 570,
-    "y": 280,
-    "wires": [
-      ["nodo_worldmap_engine_multi"],
-      ["ui_card_cosechadoras_multi"]
-    ]
-  },
-  {
-    "id": "sub_multi_camiones",
-    "type": "mqtt in",
-    "z": "tab_layout_split_final",
-    "name": "Sub camiones",
-    "topic": "truck",
-    "qos": "1",
-    "datatype": "auto-detect",
-    "broker": "broker_flota_real",
-    "nl": false,
-    "rap": true,
-    "rh": 0,
-    "inputs": 0,
-    "x": 210,
-    "y": 380,
-    "wires": [["json_multi_camiones"]]
-  },
-  {
-    "id": "json_multi_camiones",
-    "type": "json",
-    "z": "tab_layout_split_final",
-    "name": "",
-    "property": "payload",
-    "action": "",
-    "pretty": false,
-    "x": 390,
-    "y": 380,
-    "wires": [["func_multi_camiones"]]
-  },
-  {
-    "id": "func_multi_camiones",
-    "type": "function",
-    "z": "tab_layout_split_final",
-    "name": "Procesar Camión",
-    "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        return null;\n    }\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet libre = (Number(d.capacidad) === 1);\n\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"truck\",\n        iconColor: libre ? \"blue\" : \"orange\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"En ruta / Ocupado\")\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
-    "outputs": 2,
-    "x": 570,
-    "y": 380,
-    "wires": [
-      ["nodo_worldmap_engine_multi"],
-      ["ui_card_camiones_multi"]
-    ]
-  },
-  {
-    "id": "sub_multi_asig",
-    "type": "mqtt in",
-    "z": "tab_layout_split_final",
-    "name": "Sub asignaciones",
-    "topic": "asignaciones",
-    "qos": "1",
-    "datatype": "auto-detect",
-    "broker": "broker_flota_real",
-    "nl": false,
-    "rap": true,
-    "rh": 0,
-    "inputs": 0,
-    "x": 230,
-    "y": 480,
-    "wires": [["json_multi_asig"]]
-  },
-  {
-    "id": "json_multi_asig",
-    "type": "json",
-    "z": "tab_layout_split_final",
-    "name": "",
-    "property": "payload",
-    "action": "",
-    "pretty": false,
-    "x": 390,
-    "y": 480,
-    "wires": [["ui_card_asig_multi"]]
-  },
-  {
-    "id": "ui_map_embed_box_multi",
-    "type": "ui_template",
-    "z": "tab_layout_split_final",
-    "group": "grp_flota_mapa",
-    "name": "Visor Mapa Izquierda",
-    "order": 1,
-    "width": "7",
-    "height": "12",
-    "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; height: 100%; box-sizing: border-box;\">\n  <div style=\"font-size: 13px; font-weight: bold; color: #1565c0; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>📍 Supervisión GPS de Parcela</span>\n    <span style=\"font-size: 11px;\">🟢 Cosechando | 🔴 Pide vaciado | 🔵 Camión libre | 🟠 Ocupado</span>\n  </div>\n  <iframe src=\"/worldmap\" style=\"width: 100%; height: 500px; border: 1px solid #bbdefb; border-radius: 3px;\"></iframe>\n</div>",
-    "storeOutMessages": true,
-    "fwdInMessages": true,
-    "resendOnRefresh": true,
-    "templateScope": "local",
-    "className": "",
-    "x": 860,
-    "y": 240,
-    "wires": [[]]
-  },
-  {
-    "id": "ui_card_cosechadoras_multi",
-    "type": "ui_template",
-    "z": "tab_layout_split_final",
-    "group": "grp_flota_cosechadoras",
-    "name": "Lista Flota Cosechadoras",
-    "order": 1,
-    "width": "5",
-    "height": "4",
-    "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Cosechadoras</span>\n    <span>Activas: {{contar(cosechadoras)}}</span>\n  </div>\n  <div ng-if=\"!contar(cosechadoras)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de cosechadoras\n  </div>\n  <div ng-repeat=\"(id, c) in cosechadoras\" style=\"padding: 5px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <div style=\"display: flex; justify-content: space-between; align-items: center;\">\n      <span><strong>Cosechadora #{{c.id}}</strong></span>\n      <span ng-if=\"c.alerta\" style=\"color: #c62828; font-weight: bold;\">Pide vaciado ({{c.carga}}%)</span>\n      <span ng-if=\"!c.alerta\" style=\"color: #2e7d32; font-weight: bold;\">Cosechando ({{c.carga}}%)</span>\n    </div>\n    <div style=\"background: #e0e0e0; border-radius: 3px; height: 6px; width: 100%; margin-top: 3px; overflow: hidden;\">\n      <div ng-style=\"{'width': c.carga + '%', 'background-color': c.alerta ? '#c62828' : '#2e7d32'}\" style=\"height: 100%; transition: width 0.4s;\"></div>\n    </div>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.cosechadoras = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.cosechadoras[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
-    "storeOutMessages": true,
-    "fwdInMessages": true,
-    "resendOnRefresh": true,
-    "templateScope": "local",
-    "className": "",
-    "x": 870,
-    "y": 300,
-    "wires": [[]]
-  },
-  {
-    "id": "ui_card_camiones_multi",
-    "type": "ui_template",
-    "z": "tab_layout_split_final",
-    "group": "grp_flota_camiones",
-    "name": "Lista Flota Camiones",
-    "order": 1,
-    "width": "5",
-    "height": "4",
-    "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Camiones</span>\n    <span>Activos: {{contar(camiones)}}</span>\n  </div>\n  <div ng-if=\"!contar(camiones)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de camiones\n  </div>\n  <div ng-repeat=\"(id, c) in camiones\" style=\"padding: 6px 0; border-bottom: 1px dotted #e0e0e0; display: flex; justify-content: space-between; align-items: center;\">\n    <span><strong>Camión #{{c.id}}</strong></span>\n    <span ng-if=\"c.libre\" style=\"color: #1565c0; font-weight: bold;\">● Disponible</span>\n    <span ng-if=\"!c.libre\" style=\"color: #e65100; font-weight: bold;\">● Ocupado</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.camiones = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.camiones[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
-    "storeOutMessages": true,
-    "fwdInMessages": true,
-    "resendOnRefresh": true,
-    "templateScope": "local",
-    "className": "",
-    "x": 860,
-    "y": 380,
-    "wires": [[]]
-  },
-  {
-    "id": "ui_card_asig_multi",
-    "type": "ui_template",
-    "z": "tab_layout_split_final",
-    "group": "grp_flota_asignaciones",
-    "name": "Historial de Asignaciones",
-    "order": 1,
-    "width": "5",
-    "height": "4",
-    "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 11px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px;\">\n    Historial de la central\n  </div>\n  <div ng-if=\"!eventos.length\" style=\"color: #777; font-style: italic; padding-top: 25px; text-align: center;\">\n    Sin órdenes recibidas\n  </div>\n  <div ng-repeat=\"e in eventos track by $index\" style=\"padding: 3px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <span style=\"color: #666;\">[{{e.hora}}]</span>\n    <span ng-if=\"e.tipo === 'ERROR' || e.tipo === 'COLA'\" style=\"color: #c62828; font-weight: bold;\">(Aviso)</span>\n    <span ng-if=\"e.tipo !== 'ERROR' && e.tipo !== 'COLA'\" style=\"color: #2e7d32; font-weight: bold;\">(OK)</span>\n    <span>{{e.texto}}</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.eventos = scope.eventos || [];\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload) {\n      var d = msg.payload;\n      var texto = (typeof d === 'string') ? d : (d.mensaje || JSON.stringify(d));\n      var hora = new Date().toLocaleTimeString();\n      var tipo = d.tipo || 'OK';\n      scope.eventos.unshift({ hora: hora, texto: texto, tipo: tipo });\n      if (scope.eventos.length > 20) scope.eventos.pop();\n    }\n  });\n})(scope);\n</script>",
-    "storeOutMessages": true,
-    "fwdInMessages": true,
-    "resendOnRefresh": true,
-    "templateScope": "local",
-    "className": "",
-    "x": 600,
-    "y": 480,
-    "wires": [[]]
-  },
-  {
-    "id": "nodo_worldmap_engine_multi",
-    "type": "worldmap",
-    "z": "tab_layout_split_final",
-    "name": "Motor GPS",
-    "lat": "38.4716",
-    "lon": "-4.971538",
-    "zoom": "13",
-    "layer": "OSMG",
-    "cluster": "",
-    "maxage": "",
-    "usermenu": "hide",
-    "layers": "show",
-    "panit": "false",
-    "panlock": "false",
-    "zoomlock": "false",
-    "hiderightclick": "true",
-    "coords": "none",
-    "showgrid": "false",
-    "allowFileDrop": "false",
-    "path": "/worldmap",
-    "overlist": "DR,CO,RA,DN,HM",
-    "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT,EsriO,EsriDG,NatGeo,UKOS,OpTop",
-    "mapname": "",
-    "mapurl": "",
-    "mapopt": "",
-    "mapwms": false,
-    "x": 840,
-    "y": 180,
-    "wires": []
-  },
-  {
-    "id": "broker_flota_real",
-    "type": "mqtt-broker",
-    "name": "Mosquitto Local",
-    "broker": "localhost",
-    "port": "1883",
-    "clientid": "nodered_split_monitor",
-    "autoConnect": true,
-    "usetls": false,
-    "protocolVersion": "4",
-    "keepalive": "60",
-    "cleansession": true,
-    "autoUnsubscribe": true
-  },
-  {
-    "id": "grp_flota_mapa",
-    "type": "ui_group",
-    "name": "mapa",
-    "tab": "ui_tab_flota_main",
-    "order": 1,
-    "disp": false,
-    "width": "7",
-    "collapse": false,
-    "className": ""
-  },
-  {
-    "id": "grp_flota_cosechadoras",
-    "type": "ui_group",
-    "name": "cosechadoras",
-    "tab": "ui_tab_flota_main",
-    "order": 2,
-    "disp": true,
-    "width": "5",
-    "collapse": false,
-    "className": ""
-  },
-  {
-    "id": "grp_flota_camiones",
-    "type": "ui_group",
-    "name": "camiones",
-    "tab": "ui_tab_flota_main",
-    "order": 3,
-    "disp": true,
-    "width": "5",
-    "collapse": false,
-    "className": ""
-  },
-  {
-    "id": "grp_flota_asignaciones",
-    "type": "ui_group",
-    "name": "asignaciones",
-    "tab": "ui_tab_flota_main",
-    "order": 4,
-    "disp": true,
-    "width": "5",
-    "collapse": false,
-    "className": ""
-  },
-  {
-    "id": "ui_tab_flota_main",
-    "type": "ui_tab",
-    "name": "Panel de Cosecha",
-    "icon": "agriculture",
-    "order": 1,
-    "disabled": false,
-    "hidden": false
-  }
+    {
+        "id": "tab_layout_split_final",
+        "type": "tab",
+        "label": "GESTION COSECHA DIVIDIDA",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "broker_flota_real",
+        "type": "mqtt-broker",
+        "name": "Mosquitto Local",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "nodered_split_monitor",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ui_tab_flota_main",
+        "type": "ui_tab",
+        "name": "Panel de Cosecha",
+        "icon": "agriculture",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "grp_flota_mapa",
+        "type": "ui_group",
+        "name": "mapa",
+        "tab": "ui_tab_flota_main",
+        "order": 1,
+        "disp": false,
+        "width": "7",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "grp_flota_cosechadoras",
+        "type": "ui_group",
+        "name": "cosechadoras",
+        "tab": "ui_tab_flota_main",
+        "order": 2,
+        "disp": true,
+        "width": "5",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "grp_flota_camiones",
+        "type": "ui_group",
+        "name": "camiones",
+        "tab": "ui_tab_flota_main",
+        "order": 3,
+        "disp": true,
+        "width": "5",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "grp_flota_asignaciones",
+        "type": "ui_group",
+        "name": "asignaciones",
+        "tab": "ui_tab_flota_main",
+        "order": 4,
+        "disp": true,
+        "width": "5",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "227896b86e6065df",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "sub_multi_cosechadoras",
+        "type": "mqtt in",
+        "z": "tab_layout_split_final",
+        "name": "Sub cosechadoras",
+        "topic": "cosechadoras",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_flota_real",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 210,
+        "y": 280,
+        "wires": [
+            [
+                "json_multi_cos"
+            ]
+        ]
+    },
+    {
+        "id": "json_multi_cos",
+        "type": "json",
+        "z": "tab_layout_split_final",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 390,
+        "y": 280,
+        "wires": [
+            [
+                "func_multi_cos"
+            ]
+        ]
+    },
+    {
+        "id": "func_multi_cos",
+        "type": "function",
+        "z": "tab_layout_split_final",
+        "name": "Procesar Cosechadora",
+        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        return null;\n    }\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet carga = Number(d.carga) || 0;\nlet alerta = (Number(d.solicita_descarga) === 1 || carga >= 80);\n\nlet msgMapa = {\n    payload: {\n        name: \"Cosechadora \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"circle\",\n        iconColor: alerta ? \"red\" : \"green\",\n        layer: \"Cosechadoras\",\n        tooltip: \"Cosechadora \" + id + \" | Tolva: \" + carga + \"%\" + (alerta ? \" (VACIADO)\" : \"\")\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        carga: carga,\n        alerta: alerta\n    }\n};\n\nreturn [msgMapa, msgCard];",
+        "outputs": 2,
+        "x": 570,
+        "y": 280,
+        "wires": [
+            [
+                "nodo_worldmap_engine_multi"
+            ],
+            [
+                "ui_card_cosechadoras_multi"
+            ]
+        ]
+    },
+    {
+        "id": "sub_multi_camiones",
+        "type": "mqtt in",
+        "z": "tab_layout_split_final",
+        "name": "Sub camiones",
+        "topic": "truck",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_flota_real",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 210,
+        "y": 380,
+        "wires": [
+            [
+                "json_multi_camiones"
+            ]
+        ]
+    },
+    {
+        "id": "json_multi_camiones",
+        "type": "json",
+        "z": "tab_layout_split_final",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 390,
+        "y": 380,
+        "wires": [
+            [
+                "func_multi_camiones"
+            ]
+        ]
+    },
+    {
+        "id": "func_multi_camiones",
+        "type": "function",
+        "z": "tab_layout_split_final",
+        "name": "Procesar Camión",
+        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        return null;\n    }\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet libre = (Number(d.capacidad) === 1);\n\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"truck\",\n        iconColor: libre ? \"blue\" : \"orange\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"En ruta / Ocupado\")\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
+        "outputs": 2,
+        "x": 570,
+        "y": 380,
+        "wires": [
+            [
+                "nodo_worldmap_engine_multi"
+            ],
+            [
+                "ui_card_camiones_multi"
+            ]
+        ]
+    },
+    {
+        "id": "sub_multi_asig",
+        "type": "mqtt in",
+        "z": "tab_layout_split_final",
+        "name": "Sub asignaciones",
+        "topic": "asignaciones",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_flota_real",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 230,
+        "y": 480,
+        "wires": [
+            [
+                "json_multi_asig"
+            ]
+        ]
+    },
+    {
+        "id": "json_multi_asig",
+        "type": "json",
+        "z": "tab_layout_split_final",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 390,
+        "y": 480,
+        "wires": [
+            [
+                "ui_card_asig_multi"
+            ]
+        ]
+    },
+    {
+        "id": "ui_map_embed_box_multi",
+        "type": "ui_template",
+        "z": "tab_layout_split_final",
+        "group": "grp_flota_mapa",
+        "name": "Visor Mapa Izquierda",
+        "order": 1,
+        "width": "7",
+        "height": "12",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; height: 100%; box-sizing: border-box;\">\n  <div style=\"font-size: 13px; font-weight: bold; color: #1565c0; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>📍 Supervisión GPS de Parcela</span>\n    <span style=\"font-size: 11px;\">🟢 Cosechando | 🔴 Pide vaciado | 🔵 Camión libre | 🟠 Ocupado</span>\n  </div>\n  <iframe src=\"/worldmap\" style=\"width: 100%; height: 500px; border: 1px solid #bbdefb; border-radius: 3px;\"></iframe>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 860,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_card_cosechadoras_multi",
+        "type": "ui_template",
+        "z": "tab_layout_split_final",
+        "group": "grp_flota_cosechadoras",
+        "name": "Lista Flota Cosechadoras",
+        "order": 1,
+        "width": "5",
+        "height": "4",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Cosechadoras</span>\n    <span>Activas: {{contar(cosechadoras)}}</span>\n  </div>\n  <div ng-if=\"!contar(cosechadoras)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de cosechadoras\n  </div>\n  <div ng-repeat=\"(id, c) in cosechadoras\" style=\"padding: 5px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <div style=\"display: flex; justify-content: space-between; align-items: center;\">\n      <span><strong>Cosechadora #{{c.id}}</strong></span>\n      <span ng-if=\"c.alerta\" style=\"color: #c62828; font-weight: bold;\">Pide vaciado ({{c.carga}}%)</span>\n      <span ng-if=\"!c.alerta\" style=\"color: #2e7d32; font-weight: bold;\">Cosechando ({{c.carga}}%)</span>\n    </div>\n    <div style=\"background: #e0e0e0; border-radius: 3px; height: 6px; width: 100%; margin-top: 3px; overflow: hidden;\">\n      <div ng-style=\"{'width': c.carga + '%', 'background-color': c.alerta ? '#c62828' : '#2e7d32'}\" style=\"height: 100%; transition: width 0.4s;\"></div>\n    </div>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.cosechadoras = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.cosechadoras[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 870,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_card_camiones_multi",
+        "type": "ui_template",
+        "z": "tab_layout_split_final",
+        "group": "grp_flota_camiones",
+        "name": "Lista Flota Camiones",
+        "order": 1,
+        "width": "5",
+        "height": "4",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 12px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px; display: flex; justify-content: space-between;\">\n    <span>Flota de Camiones</span>\n    <span>Activos: {{contar(camiones)}}</span>\n  </div>\n  <div ng-if=\"!contar(camiones)\" style=\"color: #777; font-style: italic; text-align: center; padding-top: 25px;\">\n    Sin datos de camiones\n  </div>\n  <div ng-repeat=\"(id, c) in camiones\" style=\"padding: 6px 0; border-bottom: 1px dotted #e0e0e0; display: flex; justify-content: space-between; align-items: center;\">\n    <span><strong>Camión #{{c.id}}</strong></span>\n    <span ng-if=\"c.libre\" style=\"color: #1565c0; font-weight: bold;\">● Disponible</span>\n    <span ng-if=\"!c.libre\" style=\"color: #e65100; font-weight: bold;\">● Ocupado</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.camiones = {};\n  scope.contar = function(obj) { return Object.keys(obj || {}).length; };\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload && msg.payload.id !== undefined) {\n      scope.camiones[msg.payload.id] = msg.payload;\n    }\n  });\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 860,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ui_card_asig_multi",
+        "type": "ui_template",
+        "z": "tab_layout_split_final",
+        "group": "grp_flota_asignaciones",
+        "name": "Historial de Asignaciones",
+        "order": 1,
+        "width": "5",
+        "height": "4",
+        "format": "<div style=\"background-color: #faf8f5; border: 1px solid #90caf9; border-radius: 4px; padding: 8px; font-family: Arial, sans-serif; font-size: 11px; color: #333; height: 130px; overflow-y: auto;\">\n  <div style=\"font-weight: bold; color: #1565c0; border-bottom: 1px solid #bbdefb; padding-bottom: 4px; margin-bottom: 6px;\">\n    Historial de la central\n  </div>\n  <div ng-if=\"!eventos.length\" style=\"color: #777; font-style: italic; padding-top: 25px; text-align: center;\">\n    Sin órdenes recibidas\n  </div>\n  <div ng-repeat=\"e in eventos track by $index\" style=\"padding: 3px 0; border-bottom: 1px dotted #e0e0e0;\">\n    <span style=\"color: #666;\">[{{e.hora}}]</span>\n    <span ng-if=\"e.tipo === 'ERROR' || e.tipo === 'COLA'\" style=\"color: #c62828; font-weight: bold;\">(Aviso)</span>\n    <span ng-if=\"e.tipo !== 'ERROR' && e.tipo !== 'COLA'\" style=\"color: #2e7d32; font-weight: bold;\">(OK)</span>\n    <span>{{e.texto}}</span>\n  </div>\n</div>\n<script>\n(function(scope) {\n  scope.eventos = scope.eventos || [];\n  scope.$watch('msg', function(msg) {\n    if (msg && msg.payload) {\n      var d = msg.payload;\n      var texto = (typeof d === 'string') ? d : (d.mensaje || JSON.stringify(d));\n      var hora = new Date().toLocaleTimeString();\n      var tipo = d.tipo || 'OK';\n      scope.eventos.unshift({ hora: hora, texto: texto, tipo: tipo });\n      if (scope.eventos.length > 20) scope.eventos.pop();\n    }\n  });\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 600,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "nodo_worldmap_engine_multi",
+        "type": "worldmap",
+        "z": "tab_layout_split_final",
+        "name": "Motor GPS",
+        "lat": "38.4716",
+        "lon": "-4.971538",
+        "zoom": "13",
+        "layer": "OSMG",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "hide",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "true",
+        "coords": "none",
+        "showgrid": "false",
+        "allowFileDrop": "false",
+        "path": "/worldmap",
+        "overlist": "DR,CO,RA,DN,HM",
+        "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT,EsriO,EsriDG,NatGeo,UKOS,OpTop",
+        "mapname": "",
+        "mapurl": "",
+        "mapopt": "",
+        "mapwms": false,
+        "x": 840,
+        "y": 180,
+        "wires": []
+    }
 ]
