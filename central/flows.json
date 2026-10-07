@@ -35,15 +35,6 @@
         "sessionExpiry": ""
     },
     {
-        "id": "ui_tab_flota_main",
-        "type": "ui_tab",
-        "name": "Panel de Cosecha",
-        "icon": "agriculture",
-        "order": 1,
-        "disabled": false,
-        "hidden": false
-    },
-    {
         "id": "81bfbd1a5e462df2",
         "type": "global-config",
         "env": [],
@@ -51,6 +42,15 @@
             "node-red-dashboard": "3.6.6",
             "node-red-contrib-web-worldmap": "5.8.1"
         }
+    },
+    {
+        "id": "ui_tab_flota_main",
+        "type": "ui_tab",
+        "name": "Panel de Cosecha",
+        "icon": "agriculture",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
     },
     {
         "id": "grp_flota_mapa",
@@ -97,7 +97,7 @@
         "className": ""
     },
     {
-        "id": "4df802fbb26ec93e",
+        "id": "8a944fa6692d2a06",
         "type": "ui_base",
         "theme": {
             "name": "theme-light",
@@ -234,7 +234,7 @@
         "type": "function",
         "z": "tab_layout_split_final",
         "name": "Procesar Cosechadora",
-        "func": "let d = msg.payload;\nlet id = d.id || 1;\nlet pos = Number(d.pos) || 100;\nlet carga = (d.carga !== undefined) ? Number(d.carga) : 0;\nlet color = (carga >= 80 || d.solicita_descarga === 1) ? 'red' : 'green';\n\nlet latBase = 40.4168;\nlet lonBase = -3.7038;\nlet lat = d.lat || (latBase + (pos * 0.00003));\nlet lon = d.lon || (lonBase + (pos * 0.00004));\n\nlet msgMapa = {\n    payload: {\n        name: \"Cosechadora \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"circle\",\n        iconColor: color,\n        layer: \"Cosechadoras\",\n        tooltip: \"Cosechadora \" + id + \" | Tolva: \" + carga + \"% | Pos: \" + pos\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        carga: carga,\n        pos: pos,\n        alerta: (color === 'red')\n    }\n};\n\nreturn [msgMapa, msgCard];",
+        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        node.error(\"Error parseando JSON: \" + e.message);\n        return null;\n    }\n}\n\nif (d && d.payload && typeof d.payload === \"object\") {\n    d = d.payload;\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet carga = Number(d.carga) || 0;\nlet alerta = (Number(d.solicita_descarga) === 1 || carga >= 80);\n\n// 1. Salida para Worldmap\nlet msgMapa = {\n    payload: {\n        name: \"Cosechadora \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"fa-circle\",\n        iconColor: alerta ? \"red\" : \"green\",\n        layer: \"Cosechadoras\",\n        tooltip: \"Cosechadora \" + id + \" | Tolva: \" + carga + \"%\" + (alerta ? \" (VACIADO)\" : \"\")\n    }\n};\n\n// 2. Salida para Card / Dashboard\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        carga: carga,\n        alerta: alerta\n    }\n};\n\nreturn [msgMapa, msgCard];",
         "outputs": 2,
         "timeout": "",
         "noerr": 0,
@@ -245,10 +245,109 @@
         "y": 100,
         "wires": [
             [
-                "nodo_worldmap_engine_multi"
+                "nodo_worldmap_engine_multi",
+                "b753c5fdf907de10"
             ],
             [
                 "ui_card_cosechadoras_multi"
+            ]
+        ]
+    },
+    {
+        "id": "sub_multi_camiones",
+        "type": "mqtt in",
+        "z": "tab_layout_split_final",
+        "name": "Sub camiones",
+        "topic": "camiones",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_flota_real",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 110,
+        "y": 200,
+        "wires": [
+            [
+                "json_multi_camiones"
+            ]
+        ]
+    },
+    {
+        "id": "json_multi_camiones",
+        "type": "json",
+        "z": "tab_layout_split_final",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 310,
+        "y": 200,
+        "wires": [
+            [
+                "func_multi_camiones"
+            ]
+        ]
+    },
+    {
+        "id": "func_multi_camiones",
+        "type": "function",
+        "z": "tab_layout_split_final",
+        "name": "Procesar Camión",
+        "func": "let d = msg.payload;\n\nif (typeof d === \"string\") {\n    try {\n        d = JSON.parse(d);\n    } catch (e) {\n        node.error(\"Error parseando JSON: \" + e.message);\n        return null;\n    }\n}\n\nif (d && d.payload && typeof d.payload === \"object\") {\n    d = d.payload;\n}\n\nif (!d || d.lat === undefined || d.lon === undefined) {\n    return null;\n}\n\nlet id = d.id;\nlet lat = Number(d.lat);\nlet lon = Number(d.lon);\nlet libre = (Number(d.capacidad) === 1);\n\n// 1. Salida para Worldmap\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"fa-camiones\",\n        iconColor: libre ? \"blue\" : \"orange\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"En ruta a misión\")\n    }\n};\n\n// 2. Salida para Card / Dashboard\nlet msgCard = {\n    payload: {\n        id: id,\n        lat: lat,\n        lon: lon,\n        capacidad: d.capacidad,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 200,
+        "wires": [
+            [
+                "nodo_worldmap_engine_multi",
+                "c8cb605e581570fb"
+            ],
+            [
+                "ui_card_camiones_multi"
+            ]
+        ]
+    },
+    {
+        "id": "sub_multi_asig",
+        "type": "mqtt in",
+        "z": "tab_layout_split_final",
+        "name": "Sub asignaciones",
+        "topic": "asignaciones",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_flota_real",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 300,
+        "wires": [
+            [
+                "json_multi_asig"
+            ]
+        ]
+    },
+    {
+        "id": "json_multi_asig",
+        "type": "json",
+        "z": "tab_layout_split_final",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 310,
+        "y": 300,
+        "wires": [
+            [
+                "ui_card_asig_multi"
             ]
         ]
     },
@@ -295,61 +394,6 @@
         ]
     },
     {
-        "id": "sub_multi_camiones",
-        "type": "mqtt in",
-        "z": "tab_layout_split_final",
-        "name": "Sub truck",
-        "topic": "truck",
-        "qos": "1",
-        "datatype": "auto-detect",
-        "broker": "broker_flota_real",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 110,
-        "y": 200,
-        "wires": [
-            [
-                "json_multi_truck"
-            ]
-        ]
-    },
-    {
-        "id": "json_multi_truck",
-        "type": "json",
-        "z": "tab_layout_split_final",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": false,
-        "x": 310,
-        "y": 200,
-        "wires": [
-            [
-                "func_multi_truck"
-            ]
-        ]
-    },
-    {
-        "id": "func_multi_truck",
-        "type": "function",
-        "z": "tab_layout_split_final",
-        "name": "Procesar Camión",
-        "func": "let d = msg.payload;\nlet id = d.id || 1;\nlet pos = Number(d.pos) || 70;\nlet libre = (d.capacidad === 1);\n\nlet latBase = 40.4164;\nlet lonBase = -3.7032;\nlet lat = d.lat || (latBase + (pos * 0.00003));\nlet lon = d.lon || (lonBase + (pos * 0.00004));\n\nlet msgMapa = {\n    payload: {\n        name: \"Camión \" + id,\n        lat: lat,\n        lon: lon,\n        icon: \"circle\",\n        iconColor: \"grey\",\n        layer: \"Camiones\",\n        tooltip: \"Camión \" + id + \" | \" + (libre ? \"Disponible\" : \"En transporte\") + \" | Pos: \" + pos\n    }\n};\n\nlet msgCard = {\n    payload: {\n        id: id,\n        pos: pos,\n        libre: libre\n    }\n};\n\nreturn [msgMapa, msgCard];",
-        "outputs": 2,
-        "x": 510,
-        "y": 200,
-        "wires": [
-            [
-                "nodo_worldmap_engine_multi"
-            ],
-            [
-                "ui_card_camiones_multi"
-            ]
-        ]
-    },
-    {
         "id": "ui_card_camiones_multi",
         "type": "ui_template",
         "z": "tab_layout_split_final",
@@ -368,68 +412,6 @@
         "y": 200,
         "wires": [
             []
-        ]
-    },
-    {
-        "id": "nodo_worldmap_engine_multi",
-        "type": "worldmap",
-        "z": "tab_layout_split_final",
-        "name": "Motor GPS",
-        "lat": "40.4168",
-        "lon": "-3.7038",
-        "zoom": "17",
-        "layer": "Esri Satellite",
-        "cluster": "",
-        "maxage": "",
-        "usermenu": "hide",
-        "layers": "show",
-        "panit": "false",
-        "panlock": "false",
-        "zoomlock": "false",
-        "hiderightclick": "true",
-        "coords": "none",
-        "showgrid": "false",
-        "allowFileDrop": "false",
-        "path": "/worldmap",
-        "x": 750,
-        "y": 20,
-        "wires": []
-    },
-    {
-        "id": "sub_multi_asig",
-        "type": "mqtt in",
-        "z": "tab_layout_split_final",
-        "name": "Sub asignaciones",
-        "topic": "asignaciones",
-        "qos": "1",
-        "datatype": "auto-detect",
-        "broker": "broker_flota_real",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 130,
-        "y": 300,
-        "wires": [
-            [
-                "json_multi_asig"
-            ]
-        ]
-    },
-    {
-        "id": "json_multi_asig",
-        "type": "json",
-        "z": "tab_layout_split_final",
-        "name": "",
-        "property": "payload",
-        "action": "",
-        "pretty": false,
-        "x": 310,
-        "y": 300,
-        "wires": [
-            [
-                "ui_card_asig_multi"
-            ]
         ]
     },
     {
@@ -452,5 +434,68 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "nodo_worldmap_engine_multi",
+        "type": "worldmap",
+        "z": "tab_layout_split_final",
+        "name": "Motor GPS",
+        "lat": "38.4716",
+        "lon": "-4.971538",
+        "zoom": "17",
+        "layer": "OSMG",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "hide",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "true",
+        "coords": "none",
+        "showgrid": "false",
+        "allowFileDrop": "false",
+        "path": "/worldmap",
+        "overlist": "DR,CO,RA,DN,HM",
+        "maplist": "OSMG,OSMC,EsriC,EsriS,EsriT,EsriO,EsriDG,NatGeo,UKOS,OpTop",
+        "mapname": "",
+        "mapurl": "",
+        "mapopt": "",
+        "mapwms": false,
+        "x": 750,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "b753c5fdf907de10",
+        "type": "debug",
+        "z": "tab_layout_split_final",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "c8cb605e581570fb",
+        "type": "debug",
+        "z": "tab_layout_split_final",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 420,
+        "wires": []
     }
 ]

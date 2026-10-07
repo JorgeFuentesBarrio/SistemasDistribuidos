@@ -9,24 +9,37 @@ services:
     volumes:
       - ./central/mosquitto.conf:/mosquitto/config/mosquitto.conf
 
-  # 2. Base de datos MariaDB
-  mariadb:
-    image: mariadb:10.11
-    container_name: mariadb
+  # 2. Clúster distribuido CockroachDB (3 nodos)
+  roach1:
+    image: cockroachdb/cockroach:v23.2.0
+    container_name: roach1
     restart: unless-stopped
+    command: start --insecure --store=type=mem,size=1GiB --listen-addr=0.0.0.0:26257 --advertise-addr=roach1:26257 --http-addr=0.0.0.0:8080 --join=roach1:26257,roach2:26257,roach3:26257
     ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: db
-      MYSQL_USER: db
-      MYSQL_PASSWORD: db
-    healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
-      interval: 3s
-      timeout: 3s
-      retries: 15
-      start_period: 10s
+      - "26257:26257"
+      - "8080:8080"
+
+  roach2:
+    image: cockroachdb/cockroach:v23.2.0
+    container_name: roach2
+    restart: unless-stopped
+    command: start --insecure --store=type=mem,size=1GiB --listen-addr=0.0.0.0:26257 --advertise-addr=roach2:26257 --http-addr=0.0.0.0:8080 --join=roach1:26257,roach2:26257,roach3:26257
+
+  roach3:
+    image: cockroachdb/cockroach:v23.2.0
+    container_name: roach3
+    restart: unless-stopped
+    command: start --insecure --store=type=mem,size=1GiB --listen-addr=0.0.0.0:26257 --advertise-addr=roach3:26257 --http-addr=0.0.0.0:8080 --join=roach1:26257,roach2:26257,roach3:26257
+
+  roach-init:
+    image: cockroachdb/cockroach:v23.2.0
+    container_name: roach-init
+    command: init --insecure --host=roach1:26257
+    restart: on-failure
+    depends_on:
+      - roach1
+      - roach2
+      - roach3
 
   # 3. Node-RED (Dashboard y monitorización)
   nodered:
@@ -42,7 +55,7 @@ services:
       - ./central:/data_central
     depends_on:
       - mosquitto
-      - mariadb
+      - roach1
 
   # 4. Coordinador Central
   central:
@@ -52,16 +65,16 @@ services:
     depends_on:
       mosquitto:
         condition: service_started
-      mariadb:
-        condition: service_healthy
+      roach-init:
+        condition: service_completed_successfully
     environment:
       BROKER_HOST: mosquitto
       BROKER_PORT: 1883
-      DB_HOST: mariadb
-      DB_PORT: 3306
-      DB_USER: db
-      DB_PASS: db
-      DB_NAME: db
+      DB_HOST: roach1
+      DB_PORT: 26257
+      DB_USER: root
+      DB_PASS: ""
+      DB_NAME: defaultdb
       PYTHONUNBUFFERED: 1
 
   # 5. Flota de Camiones / Tractores
