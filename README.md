@@ -26,6 +26,6 @@ Simulacion distribuida para coordinar la descarga de cereal entre cosechadoras y
 
 `docker compose down -v`
 
-## Donde ver las cosas
+## Visualización
 
 - Mapa `http://localhost:1880/worldmap`
