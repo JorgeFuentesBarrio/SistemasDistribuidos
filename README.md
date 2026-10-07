@@ -4,7 +4,7 @@ Simulacion distribuida para coordinar la descarga de cereal entre cosechadoras y
 
 ## Como funciona
 
-1. Cosechadoras Van llenando su tolva poco a poco. Al llegar al 80% piden vaciado por MQTT y se quedan esperando.
+1. Cosechadoras: Van llenando su tolva poco a poco. Al llegar al 80% piden vaciado por MQTT y se quedan esperando.
 2. Central: Recibe la peticion, mira el camión libre mas cercano y le manda la orden. Si no hay camiones libres, mete la cosechadora en una cola de espera. Ademas, guarda las coordenadas y las misiones en la base de datos.
 3. Camiones: Van hacia las cosechadoras asignadas, llevan el grano al silo central y esperan otro viaje.
 4. CockroachDB: Guarda el historico en un cluster distribuido de 3 nodos.
@@ -12,9 +12,11 @@ Simulacion distribuida para coordinar la descarga de cereal entre cosechadoras y
 
 ## Como arrancar el proyecto
 
+**Estos comandos se deben ejecutar en la carpeta raiz del proyecto**, es decir, donde podemos encontrar el archivo `docker-compose.yml`.
+
 1. Construir las imágenes
 
-`docker compose build`
+`docker compose build --no-cache`
 
 2. Levantar el sistema
 
